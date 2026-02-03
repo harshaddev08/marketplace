@@ -1,45 +1,35 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { ProviderService } from "@/services/providerService";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { BookingService } from "@/services/bookingService";
 import { JobsTabs, Job } from "@/components/Jobs";
+import { toast } from "sonner";
 
 export default function MyJobsPage() {
-  const [jobs, setJobs] = useState<Job[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
-  const fetchJobs = async () => {
-    setLoading(true);
-    try {
-      const data = await ProviderService.getJobs();
-      setJobs(data as Job[]);
-    } catch (error) {
-      console.error("Failed to fetch jobs", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data: jobs = [], isLoading } = useQuery<Job[]>({
+    queryKey: ["provider-bookings"],
+    queryFn: () => BookingService.getProviderBookings(),
+  });
 
-  useEffect(() => {
-    fetchJobs();
-  }, []);
+  const statusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: string }) =>
+      BookingService.updateBookingStatus(id, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["provider-bookings"] });
+      toast.success("Job status updated successfully");
+    },
+    onError: (error: any) => {
+      toast.error(
+        error.response?.data?.message || "Failed to update job status",
+      );
+    },
+  });
 
   const handleStatusUpdate = async (id: string, newStatus: string) => {
-    try {
-      await ProviderService.updateJobStatus(id, newStatus);
-      // Optimistically update local state or refetch
-      setJobs((prev) =>
-        prev.map((job) =>
-          job.id === id ? { ...job, status: newStatus as Job["status"] } : job,
-        ),
-      );
-    } catch (error) {
-      console.error("Failed to update status", error);
-    }
+    statusMutation.mutate({ id, status: newStatus });
   };
-
-  // JobCard component is now expected to be part of JobsTabs or handled within it.
-  // Removing it from MyJobsPage as it's no longer directly used here.
 
   return (
     <div className="space-y-6">
@@ -52,7 +42,7 @@ export default function MyJobsPage() {
 
       <JobsTabs
         jobs={jobs}
-        loading={loading}
+        loading={isLoading}
         onStatusUpdate={handleStatusUpdate}
       />
     </div>

@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { Dialog } from "@/components/ui";
 import { Provider } from "@/components/ProviderCard";
 import { toast } from "sonner";
 import { BookingSuccessView, BookingForm } from "@/components";
+import { BookingService } from "@/services/bookingService";
 
 interface BookingModalProps {
   provider: Provider;
@@ -23,32 +25,43 @@ export const BookingModal = ({
   isOpen,
   onOpenChange,
 }: BookingModalProps) => {
-  const [bookingDetails, setBookingDetails] = useState<BookingDetails>({
-    date: new Date(),
-    time: "",
-    notes: "",
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [lastBooking, setLastBooking] = useState<BookingDetails | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const handleBookingSubmission = async (values: BookingDetails) => {
-    setIsSubmitting(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+  const bookingMutation = useMutation({
+    mutationFn: (values: BookingDetails) => {
+      if (!values.date) throw new Error("Date is required");
 
-    setBookingDetails(values);
-    setIsSubmitting(false);
-    setIsSuccess(true);
-    toast.success("Booking request sent successfully!");
+      return BookingService.createBooking({
+        providerId: provider.id,
+        service: provider.category,
+        date: values.date.toISOString(),
+        time: values.time,
+        location: provider.location,
+        notes: values.notes,
+        price: provider.hourlyRate,
+      });
+    },
+    onSuccess: (_, values) => {
+      setLastBooking(values);
+      setIsSuccess(true);
+      toast.success("Booking request sent successfully!");
+    },
+    onError: (error: unknown) => {
+      toast.error(
+        (error as any).response?.data?.message ||
+          "Failed to send booking request. Please try again.",
+      );
+    },
+  });
+
+  const handleBookingSubmission = async (values: BookingDetails) => {
+    bookingMutation.mutate(values);
   };
 
   const resetState = () => {
     setIsSuccess(false);
-    setBookingDetails({
-      date: new Date(),
-      time: "",
-      notes: "",
-    });
+    bookingMutation.reset();
   };
 
   const handleClose = (open: boolean) => {
@@ -61,20 +74,24 @@ export const BookingModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      {isSuccess ? (
+      {isSuccess && lastBooking ? (
         <BookingSuccessView
           provider={provider}
-          date={bookingDetails.date}
-          time={bookingDetails.time}
+          date={lastBooking.date}
+          time={lastBooking.time}
           onClose={() => handleClose(false)}
         />
       ) : (
         <BookingForm
           provider={provider}
-          isSubmitting={isSubmitting}
+          isSubmitting={bookingMutation.isPending}
           onConfirm={handleBookingSubmission}
           onCancel={() => handleClose(false)}
-          initialValues={bookingDetails}
+          initialValues={{
+            date: new Date(),
+            time: "",
+            notes: "",
+          }}
         />
       )}
     </Dialog>

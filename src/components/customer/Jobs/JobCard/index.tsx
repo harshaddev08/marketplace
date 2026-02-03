@@ -37,7 +37,7 @@ export const JobCard = ({ job, onCancel }: JobCardProps) => {
         <div className="flex justify-between items-start">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
-              {job.provider.charAt(0)}
+              {job.provider?.charAt(0) || "P"}
             </div>
             <div>
               <CardTitle className="text-lg font-semibold text-foreground">

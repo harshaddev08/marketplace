@@ -1,43 +1,36 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { JobsTabs } from "@/components/customer";
-import { CustomerService, CustomerJob } from "@/services/customerService";
+import { BookingService } from "@/services/bookingService";
+import { CustomerJob } from "@/services/customerService";
+import { toast } from "sonner";
 
 export default function CustomerJobsPage() {
-  const [jobs, setJobs] = useState<CustomerJob[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
-  const fetchJobs = async () => {
-    setLoading(true);
-    try {
-      const data = await CustomerService.getJobs();
-      setJobs(data);
-    } catch (error) {
-      console.error("Error fetching jobs:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data: jobs = [], isLoading } = useQuery<CustomerJob[]>({
+    queryKey: ["customer-bookings"],
+    queryFn: () => BookingService.getMyBookings(),
+  });
 
-  useEffect(() => {
-    fetchJobs();
-  }, []);
+  const cancelMutation = useMutation({
+    mutationFn: (id: string) => BookingService.cancelBooking(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["customer-bookings"] });
+      toast.success("Booking cancelled successfully");
+    },
+    onError: (error: unknown) => {
+      toast.error(
+        (error as any).response?.data?.message || "Failed to cancel booking",
+      );
+    },
+  });
 
   const handleCancel = async (id: string) => {
-    try {
-      await CustomerService.cancelJob(id);
-      // Update local state to show cancelled status
-      setJobs(
-        jobs.map((job) =>
-          job.id === id ? { ...job, status: "cancelled" } : job,
-        ),
-      );
-    } catch (error) {
-      console.error("Error cancelling job:", error);
-    }
+    cancelMutation.mutate(id);
   };
 
   return (
@@ -54,7 +47,7 @@ export default function CustomerJobsPage() {
             </p>
           </div>
 
-          <JobsTabs jobs={jobs} loading={loading} onCancel={handleCancel} />
+          <JobsTabs jobs={jobs} loading={isLoading} onCancel={handleCancel} />
         </div>
       </main>
       <Footer />
