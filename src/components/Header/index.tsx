@@ -4,9 +4,10 @@ import Link from "next/link";
 import { MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import { UserMenu } from "@/components/UserMenu";
 
 export const Header = () => {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   return (
     <header className="fixed top-0 left-0 right-0 z-50 glass border-b border-border/50 mx-auto">
       <div className="container mx-auto flex items-center justify-between h-16 md:h-18">
@@ -22,34 +23,41 @@ export const Header = () => {
 
         {/* Navigation */}
         <nav className="hidden md:flex items-center gap-8">
-          <a
-            href="#services"
+          <Link
+            href="/#services"
             className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
             Services
-          </a>
-          <a
-            href="#how-it-works"
+          </Link>
+          <Link
+            href="/#how-it-works"
             className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
             How It Works
-          </a>
-          <a
-            href="#why-us"
+          </Link>
+          <Link
+            href="/#why-us"
             className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
           >
             Why Us
-          </a>
+          </Link>
         </nav>
 
         {/* CTA Buttons */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           {user?.roles?.includes("provider") ? (
             <Link
               href="/provider/dashboard"
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
             >
               Dashboard
+            </Link>
+          ) : user ? (
+            <Link
+              href="/customer/jobs"
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
+              My Bookings
             </Link>
           ) : (
             <Link
@@ -61,14 +69,9 @@ export const Header = () => {
           )}
 
           {user ? (
-            <div className="flex items-center gap-4">
-              <span className="text-sm font-medium">Hello, {user.name}</span>
-              <Button variant="ghost" size="sm" onClick={logout}>
-                Logout
-              </Button>
-            </div>
+            <UserMenu />
           ) : (
-            <>
+            <div className="flex items-center gap-3">
               <Link href="/auth">
                 <Button variant="ghost" size="sm">
                   Login
@@ -79,11 +82,10 @@ export const Header = () => {
                   Sign Up
                 </Button>
               </Link>
-            </>
+            </div>
           )}
         </div>
       </div>
     </header>
   );
 };
-

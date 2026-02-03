@@ -11,6 +11,7 @@ export * from "./NavLink";
 export * from "./ServicesSection";
 export * from "./TrustSection";
 export * from "./WhyChooseUsSection";
+export * from "./UserMenu";
 
 // Page-Specific Components
 export * from "./Earnings";
