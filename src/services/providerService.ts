@@ -10,6 +10,19 @@ export interface ProviderApplicationData {
   about: string;
 }
 
+export interface BackendProvider {
+  id: string;
+  name: string;
+  category: string;
+  rating: number;
+  reviewsCount: number;
+  hourlyRate: number;
+  experience: number;
+  location: string;
+  isVerified: boolean;
+  avatar?: string;
+}
+
 export const ProviderService = {
   async applyToBecomeProvider(data: ProviderApplicationData) {
     const response = await apiService.post("/providers/apply", data);
@@ -163,5 +176,17 @@ export const ProviderService = {
   async getUpcomingJobs() {
     const response = await apiService.get("/providers/jobs/upcoming");
     return response.data;
+  },
+
+  async getProviders(
+    filters: Record<string, string> = {},
+  ): Promise<BackendProvider[]> {
+    const response = await apiService.get("/providers", { params: filters });
+    return response.data.data;
+  },
+
+  async getProviderById(id: string): Promise<BackendProvider> {
+    const response = await apiService.get(`/providers/${id}`);
+    return response.data.data;
   },
 };

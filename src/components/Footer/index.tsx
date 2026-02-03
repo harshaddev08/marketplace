@@ -3,11 +3,11 @@ import Link from "next/link";
 
 const footerLinks = {
   services: [
-    { name: "Plumber", href: "#" },
-    { name: "Electrician", href: "#" },
-    { name: "Cleaner", href: "#" },
-    { name: "AC Repair", href: "#" },
-    { name: "Painter", href: "#" },
+    { name: "Plumber", href: "/providers?category=Plumber" },
+    { name: "Electrician", href: "/providers?category=Electrician" },
+    { name: "Cleaner", href: "/providers?category=Cleaner" },
+    { name: "AC Repair", href: "/providers?category=AC Repair" },
+    { name: "Painter", href: "/providers?category=Painter" },
   ],
   company: [
     { name: "About Us", href: "#" },
@@ -22,7 +22,7 @@ const footerLinks = {
     { name: "Privacy Policy", href: "#" },
   ],
   providers: [
-    { name: "Become a Provider", href: "#" },
+    { name: "Become a Provider", href: "/become-provider" },
     { name: "Provider Resources", href: "#" },
     { name: "Success Stories", href: "#" },
   ],
@@ -170,4 +170,3 @@ export const Footer = () => {
     </footer>
   );
 };
-
