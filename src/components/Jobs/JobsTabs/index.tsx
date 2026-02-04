@@ -47,7 +47,7 @@ export function JobsTabs({ jobs, loading, onStatusUpdate }: JobsTabsProps) {
               variant={
                 job.status === "completed"
                   ? "default"
-                  : job.status === "active"
+                  : job.status === "confirmed"
                     ? "secondary"
                     : "outline"
               }
@@ -86,14 +86,14 @@ export function JobsTabs({ jobs, loading, onStatusUpdate }: JobsTabsProps) {
             <Button
               variant="coral"
               size="sm"
-              onClick={() => onStatusUpdate(job.id, "active")}
+              onClick={() => onStatusUpdate(job.id, "confirmed")}
             >
               <CheckCircle className="w-4 h-4 mr-2" />
               Accept
             </Button>
           </>
         )}
-        {job.status === "active" && (
+        {job.status === "confirmed" && (
           <Button
             className="bg-green-600 hover:bg-green-700 text-white"
             size="sm"
@@ -117,7 +117,7 @@ export function JobsTabs({ jobs, loading, onStatusUpdate }: JobsTabsProps) {
       <TabsList className="grid w-full max-w-md grid-cols-4 mb-8">
         <TabsTrigger value="all">All</TabsTrigger>
         <TabsTrigger value="pending">Pending</TabsTrigger>
-        <TabsTrigger value="active">Active</TabsTrigger>
+        <TabsTrigger value="confirmed">Confirmed</TabsTrigger>
         <TabsTrigger value="completed">Done</TabsTrigger>
       </TabsList>
 
@@ -129,7 +129,7 @@ export function JobsTabs({ jobs, loading, onStatusUpdate }: JobsTabsProps) {
           </div>
         ) : (
           <>
-            {["all", "pending", "active", "completed"].map((tab) => {
+            {["all", "pending", "confirmed", "completed"].map((tab) => {
               const filteredJobs = jobs.filter(
                 (job) =>
                   tab === "all" ||

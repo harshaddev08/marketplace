@@ -15,9 +15,10 @@ import { CustomerJob } from "@/services/customerService";
 interface JobCardProps {
   job: CustomerJob;
   onCancel: (id: string) => Promise<void>;
+  onReview?: (job: CustomerJob) => void;
 }
 
-export const JobCard = ({ job, onCancel }: JobCardProps) => {
+export const JobCard = ({ job, onCancel, onReview }: JobCardProps) => {
   const getStatusVariant = (status: string) => {
     switch (status) {
       case "completed":
@@ -82,8 +83,8 @@ export const JobCard = ({ job, onCancel }: JobCardProps) => {
             Cancel Booking
           </Button>
         )}
-        {job.status === "completed" && (
-          <Button variant="coral" size="sm">
+        {job.status === "completed" && !job.isReviewed && (
+          <Button variant="coral" size="sm" onClick={() => onReview?.(job)}>
             <Star className="w-4 h-4 mr-2" />
             Leave a Review
           </Button>

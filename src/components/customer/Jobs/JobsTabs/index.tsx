@@ -9,15 +9,21 @@ interface JobsTabsProps {
   jobs: CustomerJob[];
   loading: boolean;
   onCancel: (id: string) => Promise<void>;
+  onReview?: (job: CustomerJob) => void;
 }
 
-export const JobsTabs = ({ jobs, loading, onCancel }: JobsTabsProps) => {
+export const JobsTabs = ({
+  jobs,
+  loading,
+  onCancel,
+  onReview,
+}: JobsTabsProps) => {
   return (
     <Tabs defaultValue="all" className="w-full">
       <TabsList className="grid w-full max-w-md grid-cols-4 mb-8">
         <TabsTrigger value="all">All</TabsTrigger>
         <TabsTrigger value="pending">Upcoming</TabsTrigger>
-        <TabsTrigger value="active">Active</TabsTrigger>
+        <TabsTrigger value="confirmed">Confirmed</TabsTrigger>
         <TabsTrigger value="completed">Done</TabsTrigger>
       </TabsList>
 
@@ -29,7 +35,7 @@ export const JobsTabs = ({ jobs, loading, onCancel }: JobsTabsProps) => {
           </div>
         ) : (
           <>
-            {["all", "pending", "active", "completed"].map((tab) => {
+            {["all", "pending", "confirmed", "completed"].map((tab) => {
               const filteredJobs = jobs.filter(
                 (job) =>
                   tab === "all" ||
@@ -47,7 +53,12 @@ export const JobsTabs = ({ jobs, loading, onCancel }: JobsTabsProps) => {
                   {filteredJobs.length > 0 ? (
                     <div className="grid md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                       {filteredJobs.map((job) => (
-                        <JobCard key={job.id} job={job} onCancel={onCancel} />
+                        <JobCard
+                          key={job.id}
+                          job={job}
+                          onCancel={onCancel}
+                          onReview={onReview}
+                        />
                       ))}
                     </div>
                   ) : (

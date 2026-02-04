@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/components/ui";
+
 import { ProviderService } from "@/services/providerService";
 import {
   Card,
@@ -23,50 +25,72 @@ import {
   JobRequestCard,
   UpcomingJobCard,
   EmptyState,
-  Job,
-  DashboardStats,
 } from "@/components/provider";
+import { BookingService } from "@/services/bookingService";
 
 export default function ProviderDashboard() {
-  const [profile, setProfile] = useState<{ fullName: string } | null>(null);
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [jobRequests, setJobRequests] = useState<Job[]>([]);
-  const [upcomingJobs, setUpcomingJobs] = useState<Job[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        const [profileData, statsData, requestsData, upcomingData] =
-          await Promise.all([
-            ProviderService.getProfile(),
-            ProviderService.getDashboardStats(),
-            ProviderService.getJobRequests(),
-            ProviderService.getUpcomingJobs(),
-          ]);
+  const { data: profile, isLoading: isLoadingProfile } = useQuery({
+    queryKey: ["provider-profile"],
+    queryFn: () => ProviderService.getProfile(),
+  });
 
-        setProfile(profileData);
-        setStats(statsData);
-        setJobRequests(requestsData);
-        setUpcomingJobs(upcomingData);
-      } catch (error) {
-        console.error("Failed to fetch dashboard data", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const { data: stats, isLoading: isLoadingStats } = useQuery({
+    queryKey: ["provider-stats"],
+    queryFn: () => ProviderService.getDashboardStats(),
+  });
 
-    fetchDashboardData();
-  }, []);
+  const { data: jobRequests = [], isLoading: isLoadingRequests } = useQuery({
+    queryKey: ["provider-job-requests"],
+    queryFn: () => ProviderService.getJobRequests(),
+  });
 
-  const handleAcceptJob = (jobId: string) => {
-    console.log("Accept job:", jobId);
-    // TODO: Implement accept job logic
+  const { data: upcomingJobs = [], isLoading: isLoadingUpcoming } = useQuery({
+    queryKey: ["provider-upcoming-jobs"],
+    queryFn: () => ProviderService.getUpcomingJobs(),
+  });
+
+  const loading =
+    isLoadingProfile ||
+    isLoadingStats ||
+    isLoadingRequests ||
+    isLoadingUpcoming;
+
+  const updateStatusMutation = useMutation({
+    mutationFn: ({
+      bookingId,
+      status,
+    }: {
+      bookingId: string;
+      status: string;
+    }) => BookingService.updateBookingStatus(bookingId, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["provider-job-requests"] });
+      queryClient.invalidateQueries({ queryKey: ["provider-upcoming-jobs"] });
+      queryClient.invalidateQueries({ queryKey: ["provider-stats"] });
+      toast({
+        title: "Success",
+        description: "Job status updated successfully",
+      });
+    },
+    onError: (error) => {
+      console.error("Failed to update status:", error);
+      toast({
+        title: "Error",
+        description: "Failed to update job status. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleAcceptJob = (bookingId: string) => {
+    updateStatusMutation.mutate({ bookingId, status: "confirmed" });
   };
 
-  const handleDeclineJob = (jobId: string) => {
-    console.log("Decline job:", jobId);
-    // TODO: Implement decline job logic
+  const handleDeclineJob = (bookingId: string) => {
+    updateStatusMutation.mutate({ bookingId, status: "cancelled" });
   };
 
   const handleUpdateAvailability = () => {
@@ -77,26 +101,26 @@ export default function ProviderDashboard() {
   const statsData = [
     {
       label: "Total Earnings",
-      value: `$${stats?.totalEarnings?.toFixed(2) || "0.00"}`,
+      value: `$${stats?.data?.totalEarnings?.toFixed(2) || "0.00"}`,
       change: "+12.5% this month",
       icon: DollarSign,
       showBadge: true,
     },
     {
       label: "Active Jobs",
-      value: stats?.activeJobs?.toString() || "0",
-      change: `${jobRequests.length} new requests`,
+      value: stats?.data?.activeJobs?.toString() || "0",
+      change: `${jobRequests?.data?.length} new requests`,
       icon: Briefcase,
     },
     {
       label: "Rating",
-      value: stats?.rating?.toFixed(1) || "0.0",
+      value: stats?.data?.rating?.toFixed(1) || "0.0",
       change: "Based on reviews",
       icon: Star,
     },
     {
       label: "Profile Views",
-      value: stats?.profileViews?.toString() || "0",
+      value: stats?.data?.profileViews?.toString() || "0",
       change: "+22% this week",
       icon: TrendingUp,
     },
@@ -114,14 +138,12 @@ export default function ProviderDashboard() {
     <div className="space-y-8">
       <DashboardHeader fullName={profile?.fullName} />
 
-      {/* Stats Grid */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {statsData.map((stat, index) => (
           <StatsCard key={index} {...stat} />
         ))}
       </div>
 
-      {/* Recent Requests Section */}
       <div className="grid md:grid-cols-3 gap-8">
         <div className="md:col-span-2 space-y-6">
           <div className="flex items-center justify-between">
@@ -137,8 +159,8 @@ export default function ProviderDashboard() {
           </div>
 
           <div className="space-y-4">
-            {jobRequests.length > 0 ? (
-              jobRequests.map((request) => (
+            {jobRequests?.data?.length > 0 ? (
+              jobRequests?.data?.map((request: any) => (
                 <JobRequestCard
                   key={request._id}
                   job={request}
@@ -163,15 +185,15 @@ export default function ProviderDashboard() {
             <CardHeader>
               <CardTitle className="text-base">Today&apos;s Schedule</CardTitle>
               <CardDescription>
-                {upcomingJobs.length > 0
-                  ? `You have ${upcomingJobs.length} job${upcomingJobs.length > 1 ? "s" : ""} scheduled.`
+                {upcomingJobs?.data?.length > 0
+                  ? `You have ${upcomingJobs?.data?.length} job${upcomingJobs?.data?.length > 1 ? "s" : ""} scheduled.`
                   : "You have no jobs scheduled for today."}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {upcomingJobs.length > 0 ? (
+              {upcomingJobs?.data?.length > 0 ? (
                 <div className="space-y-3">
-                  {upcomingJobs.map((job) => (
+                  {upcomingJobs?.data?.map((job: any) => (
                     <UpcomingJobCard key={job._id} job={job} />
                   ))}
                 </div>

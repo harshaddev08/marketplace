@@ -1,15 +1,19 @@
 "use client";
 
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { JobsTabs } from "@/components/customer";
+import { ReviewModal } from "@/components";
 import { BookingService } from "@/services/bookingService";
 import { CustomerJob } from "@/services/customerService";
 import { toast } from "sonner";
 
 export default function CustomerJobsPage() {
   const queryClient = useQueryClient();
+  const [selectedJob, setSelectedJob] = useState<CustomerJob | null>(null);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
   const { data: jobs = [], isLoading } = useQuery<CustomerJob[]>({
     queryKey: ["customer-bookings"],
@@ -33,6 +37,11 @@ export default function CustomerJobsPage() {
     cancelMutation.mutate(id);
   };
 
+  const handleReview = (job: CustomerJob) => {
+    setSelectedJob(job);
+    setIsReviewModalOpen(true);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -47,10 +56,24 @@ export default function CustomerJobsPage() {
             </p>
           </div>
 
-          <JobsTabs jobs={jobs} loading={isLoading} onCancel={handleCancel} />
+          <JobsTabs
+            jobs={jobs}
+            loading={isLoading}
+            onCancel={handleCancel}
+            onReview={handleReview}
+          />
         </div>
       </main>
       <Footer />
+
+      {selectedJob && (
+        <ReviewModal
+          isOpen={isReviewModalOpen}
+          onOpenChange={setIsReviewModalOpen}
+          bookingId={selectedJob.id}
+          providerName={selectedJob.provider}
+        />
+      )}
     </div>
   );
 }

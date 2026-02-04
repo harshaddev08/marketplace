@@ -11,9 +11,9 @@ export interface Job {
   service: string;
   description?: string;
   location: string;
-  scheduledDate: string;
+  date: string;
   price: number;
-  status: "pending" | "accepted" | "rejected" | "completed" | "cancelled";
+  status: "pending" | "confirmed" | "completed" | "cancelled";
 }
 
 export interface DashboardStats {

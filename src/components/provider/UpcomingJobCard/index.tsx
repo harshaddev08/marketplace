@@ -1,3 +1,4 @@
+import moment from "moment";
 import { Clock } from "lucide-react";
 import { Job } from "../types";
 
@@ -7,13 +8,8 @@ interface UpcomingJobCardProps {
 
 export default function UpcomingJobCard({ job }: UpcomingJobCardProps) {
   const customerName = job.customer?.name || "Unknown";
-  const scheduledDate = new Date(job.scheduledDate);
-  const formattedDate = scheduledDate.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
+  const scheduledDate = new Date(job.date);
+  const formattedDate = moment(scheduledDate).format("MMM D, h:mm A");
 
   return (
     <div className="flex items-start gap-3 p-3 rounded-lg bg-accent/5 hover:bg-accent/10 transition-colors">

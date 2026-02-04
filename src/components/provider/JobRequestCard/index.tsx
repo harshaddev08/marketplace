@@ -1,4 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
+import moment from "moment";
 import { Button } from "@/components/ui/button";
 import { MapPin, Clock } from "lucide-react";
 import { Job } from "../types";
@@ -15,13 +16,8 @@ export default function JobRequestCard({
   onDecline,
 }: JobRequestCardProps) {
   const customerName = job.customer?.name || "Unknown Customer";
-  const scheduledDate = new Date(job.scheduledDate);
-  const formattedDate = scheduledDate.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
+  const scheduledDate = new Date(job.date);
+  const formattedDate = moment(scheduledDate).format("MMM D, h:mm A");
 
   return (
     <Card className="shadow-soft border-border hover:border-primary/50 transition-colors">
@@ -34,7 +30,7 @@ export default function JobRequestCard({
           <h3 className="font-semibold text-foreground">{customerName}</h3>
           <p className="text-sm text-muted-foreground mb-2">{job.service}</p>
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-xs text-muted-foreground">
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 capitalize">
               <MapPin className="w-3 h-3" />
               {job.location}
             </div>

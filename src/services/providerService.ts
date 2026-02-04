@@ -40,10 +40,8 @@ export const ProviderService = {
   },
 
   async updateProfile(data: Partial<ProviderApplicationData>) {
-    // const response = await apiService.patch("/providers/profile", data);
-    // return response.data;
-    console.log("Updated profile:", data);
-    return { success: true };
+    const response = await apiService.patch("/providers/profile", data);
+    return response.data;
   },
 
   async getSettings() {
@@ -67,8 +65,8 @@ export const ProviderService = {
   },
 
   async updateSettings(data: unknown) {
-    console.log("Updated settings:", data);
-    return { success: true };
+    const response = await apiService.patch("/providers/settings", data);
+    return response.data;
   },
 
   async getJobs(status?: string) {
@@ -96,7 +94,7 @@ export const ProviderService = {
         location: "Westside, House 12",
         date: "Tomorrow, 10:00 AM",
         price: "$150",
-        status: "active",
+        status: "confirmed",
         description: "Post-construction cleaning required.",
       },
       {
@@ -113,10 +111,10 @@ export const ProviderService = {
   },
 
   async updateJobStatus(jobId: string, status: string) {
-    // const response = await apiService.patch(`/providers/jobs/${jobId}/status`, { status });
-    // return response.data;
-    console.log(`Updated job ${jobId} to ${status}`);
-    return { success: true };
+    const response = await apiService.patch(`/providers/jobs/${jobId}/status`, {
+      status,
+    });
+    return response.data;
   },
 
   async getEarningsStats() {

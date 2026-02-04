@@ -22,6 +22,7 @@ export * from "./BookingForm";
 export * from "./MessageModal";
 export * from "./MessageSuccessView";
 export * from "./MessageForm";
+export * from "./ReviewModal";
 
 // Page-Specific Components
 export * from "./Earnings";

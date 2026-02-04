@@ -5,6 +5,6 @@ export interface Job {
   location: string;
   date: string;
   price: string;
-  status: "pending" | "active" | "completed";
+  status: "pending" | "confirmed" | "completed" | "cancelled";
   description: string;
 }
