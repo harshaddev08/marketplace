@@ -14,6 +14,7 @@ import {
   X,
   MapPin,
   Settings,
+  List,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -66,6 +67,11 @@ export default function ProviderLayout({ children }: ProviderLayoutProps) {
       icon: DollarSign,
       label: "Earnings",
       href: "/provider/earnings",
+    },
+    {
+      icon: List,
+      label: "Services",
+      href: "/provider/services",
     },
     {
       icon: User,

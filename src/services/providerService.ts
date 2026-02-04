@@ -23,6 +23,15 @@ export interface BackendProvider {
   avatar?: string;
 }
 
+export interface Service {
+  _id: string;
+  name: string;
+  description: string;
+  price: number;
+  duration: number;
+  category: string;
+}
+
 export const ProviderService = {
   async applyToBecomeProvider(data: ProviderApplicationData) {
     const response = await apiService.post("/providers/apply", data);
@@ -186,5 +195,25 @@ export const ProviderService = {
   async getProviderById(id: string): Promise<BackendProvider> {
     const response = await apiService.get(`/providers/${id}`);
     return response.data.data;
+  },
+
+  // Service Management
+  async getServices(): Promise<Service[]> {
+    const response = await apiService.get("/services");
+    return response.data.data;
+  },
+
+  async addService(service: Omit<Service, "id">): Promise<Service> {
+    const response = await apiService.post("/services", service);
+    return response.data.data;
+  },
+
+  async updateService(id: string, updates: Partial<Service>): Promise<Service> {
+    const response = await apiService.patch(`/services/${id}`, updates);
+    return response.data.data;
+  },
+
+  async deleteService(id: string): Promise<void> {
+    await apiService.delete(`/services/${id}`);
   },
 };
