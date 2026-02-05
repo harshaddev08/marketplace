@@ -4,6 +4,7 @@ import { Job as ProviderJob } from "@/components/Jobs/types";
 
 export interface CreateBookingData {
   providerId: string;
+  serviceId?: string;
   service: string;
   date: string;
   time: string;

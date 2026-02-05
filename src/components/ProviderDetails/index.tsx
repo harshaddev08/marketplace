@@ -33,6 +33,9 @@ interface ProviderDetailsProps {
 export const ProviderDetails = ({ provider }: ProviderDetailsProps) => {
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [isMessageOpen, setIsMessageOpen] = useState(false);
+
+  const primaryService = provider.services?.find((s) => s.isPrimary);
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       {/* Left Column: Profile Info */}
@@ -91,12 +94,7 @@ export const ProviderDetails = ({ provider }: ProviderDetailsProps) => {
           <div>
             <h2 className="text-xl font-bold mb-4">About</h2>
             <p className="text-muted-foreground leading-relaxed">
-              Highly skilled {provider.category} with over {provider.experience}{" "}
-              years of professional experience. Dedicated to providing
-              top-quality service and ensuring customer satisfaction. I
-              specialize in all types of {provider.category.toLowerCase()} work,
-              from small repairs to large installations. I take pride in my
-              punctuality, cleanliness, and transparent communication.
+              {provider?.bio}
             </p>
           </div>
         </section>
@@ -104,34 +102,64 @@ export const ProviderDetails = ({ provider }: ProviderDetailsProps) => {
         <section className="glass-card p-8 rounded-2xl">
           <h2 className="text-xl font-bold mb-6">Services & Pricing</h2>
           <div className="space-y-4">
-            <div className="flex justify-between items-center p-4 bg-muted/20 rounded-xl border border-border/50">
-              <div>
-                <h3 className="font-bold">Standard Consultation</h3>
-                <p className="text-sm text-muted-foreground">
-                  Initial assessment and minor repairs
-                </p>
+            {provider.services && provider.services.length > 0 ? (
+              provider.services.map((service) => (
+                <div
+                  key={service._id}
+                  className={`flex justify-between items-center p-4 rounded-xl border transition-colors ${
+                    service.isPrimary
+                      ? "bg-coral/5 border-coral/30 hover:bg-coral/10"
+                      : "bg-muted/20 border-border/50 hover:bg-muted/30"
+                  }`}
+                >
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-bold">{service.name}</h3>
+                      {service.isPrimary && (
+                        <Badge
+                          variant="secondary"
+                          className="bg-coral text-white hover:bg-coral/90 text-[10px] h-5 px-1.5"
+                        >
+                          Primary
+                        </Badge>
+                      )}
+                    </div>
+                    {service.description && (
+                      <p className="text-sm text-muted-foreground">
+                        {service.description}
+                      </p>
+                    )}
+                    {service.duration && (
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                        <Clock className="w-3 h-3" />
+                        <span>{service.duration} mins</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xl font-bold text-coral">
+                      ${service.price}
+                    </span>
+                    {/* <span className="text-sm text-muted-foreground">/hr</span> */}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="flex justify-between items-center p-4 bg-muted/20 rounded-xl border border-border/50">
+                <div>
+                  <h3 className="font-bold">Standard Consultation</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Initial assessment and minor repairs
+                  </p>
+                </div>
+                <div className="text-right">
+                  <span className="text-xl font-bold text-coral">
+                    ${provider.hourlyRate}
+                  </span>
+                  <span className="text-sm text-muted-foreground">/hr</span>
+                </div>
               </div>
-              <div className="text-right">
-                <span className="text-xl font-bold text-coral">
-                  ${provider.hourlyRate}
-                </span>
-                <span className="text-sm text-muted-foreground">/hr</span>
-              </div>
-            </div>
-            <div className="flex justify-between items-center p-4 bg-muted/20 rounded-xl border border-border/50">
-              <div>
-                <h3 className="font-bold">Emergency Service</h3>
-                <p className="text-sm text-muted-foreground">
-                  Immediate response for urgent issues
-                </p>
-              </div>
-              <div className="text-right">
-                <span className="text-xl font-bold text-coral">
-                  ${Math.round(provider.hourlyRate * 1.5)}
-                </span>
-                <span className="text-sm text-muted-foreground">/hr</span>
-              </div>
-            </div>
+            )}
           </div>
         </section>
       </div>
@@ -145,13 +173,15 @@ export const ProviderDetails = ({ provider }: ProviderDetailsProps) => {
           <CardContent className="space-y-6">
             <div className="p-4 bg-coral/5 rounded-xl border border-coral/10">
               <p className="text-sm text-muted-foreground mb-1">
-                Starting from
+                {primaryService ? "Primary Service" : "Starting from"}
               </p>
               <p className="text-3xl font-bold text-foreground">
-                ${provider.hourlyRate}
-                <span className="text-base font-normal text-muted-foreground ml-1">
-                  /hour
-                </span>
+                ${primaryService ? primaryService.price : provider.hourlyRate}
+                {!primaryService && (
+                  <span className="text-base font-normal text-muted-foreground ml-1">
+                    /hour
+                  </span>
+                )}
               </p>
             </div>
 

@@ -5,6 +5,7 @@ import {
   Clock,
   MessageSquare,
   AlertCircle,
+  Briefcase,
 } from "lucide-react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -22,6 +23,8 @@ import {
   SelectValue,
   Textarea,
   Label,
+  RadioGroup,
+  RadioGroupItem,
 } from "@/components/ui";
 import { Provider } from "@/components/ProviderCard";
 
@@ -32,12 +35,15 @@ interface BookingFormProps {
     date: Date | undefined;
     time: string;
     notes: string;
+    serviceId?: string;
+    price: number;
   }) => void;
   onCancel: () => void;
   initialValues?: {
     date: Date | undefined;
     time: string;
     notes: string;
+    serviceId?: string;
   };
 }
 
@@ -57,6 +63,7 @@ const validationSchema = Yup.object().shape({
   date: Yup.date().required("Please select a date"),
   time: Yup.string().required("Please select a time slot"),
   notes: Yup.string().max(500, "Notes cannot exceed 500 characters"),
+  serviceId: Yup.string().optional(),
 });
 
 export const BookingForm = ({
@@ -68,15 +75,33 @@ export const BookingForm = ({
     date: new Date(),
     time: "",
     notes: "",
+    serviceId:
+      provider.services && provider.services.length > 0
+        ? provider.services.find((s) => s.isPrimary)?._id ||
+          provider.services[0]._id
+        : undefined,
   },
 }: BookingFormProps) => {
   const formik = useFormik({
     initialValues,
     validationSchema,
     onSubmit: (values) => {
-      onConfirm(values);
+      const selectedService = provider.services?.find(
+        (s) => s._id === values.serviceId,
+      );
+      const price = selectedService
+        ? selectedService.price
+        : provider.hourlyRate;
+      onConfirm({ ...values, price });
     },
   });
+
+  const selectedService = provider.services?.find(
+    (s) => s._id === formik.values.serviceId,
+  );
+  const currentPrice = selectedService
+    ? selectedService.price
+    : provider.hourlyRate;
 
   return (
     <DialogContent className="sm:max-w-[700px] p-0 overflow-hidden border-none glass-card max-h-[90vh] flex flex-col">
@@ -111,6 +136,54 @@ export const BookingForm = ({
                 <div className="flex items-center gap-2 text-destructive text-sm mt-1 animate-in fade-in slide-in-from-top-1">
                   <AlertCircle className="w-4 h-4" />
                   {formik.errors.date as string}
+                </div>
+              )}
+
+              {/* Service Selection for Mobile/Left Column */}
+              {provider.services && provider.services.length > 0 && (
+                <div className="space-y-4 mt-6">
+                  <Label className="text-base font-bold flex items-center gap-2">
+                    <Briefcase className="w-4 h-4 text-coral" />
+                    Select Service
+                  </Label>
+                  <RadioGroup
+                    value={formik.values.serviceId}
+                    onValueChange={(val) =>
+                      formik.setFieldValue("serviceId", val)
+                    }
+                    className="gap-3"
+                  >
+                    {provider.services.map((service) => (
+                      <label
+                        key={service._id}
+                        htmlFor={service._id}
+                        className={`flex items-center space-x-2 rounded-xl border p-3 cursor-pointer transition-all ${
+                          formik.values.serviceId === service._id
+                            ? "border-coral bg-coral/5"
+                            : "border-border/50 bg-background/50 hover:bg-muted/50"
+                        }`}
+                      >
+                        <RadioGroupItem
+                          value={service._id}
+                          id={service._id}
+                          className="data-[state=checked]:border-coral data-[state=checked]:text-coral"
+                        />
+                        <div className="grow cursor-pointer">
+                          <span className="font-bold block text-sm">
+                            {service.name}
+                          </span>
+                          {service.description && (
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              {service.description}
+                            </p>
+                          )}
+                        </div>
+                        <div className="font-bold text-coral text-sm">
+                          ${service.price}
+                        </div>
+                      </label>
+                    ))}
+                  </RadioGroup>
                 </div>
               )}
             </div>
@@ -173,13 +246,25 @@ export const BookingForm = ({
 
               <div className="bg-coral/5 p-4 rounded-xl border border-coral/10 space-y-2">
                 <div className="flex justify-between items-center font-bold">
-                  <span>Hourly Rate</span>
-                  <span className="text-coral">${provider.hourlyRate}/hr</span>
+                  <span>
+                    {selectedService ? "Service Price" : "Hourly Rate"}
+                  </span>
+                  <span className="text-coral">${currentPrice}</span>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  Final price may vary based on actual hours worked and
-                  materials used.
-                </p>
+                {selectedService ? (
+                  <p className="text-xs text-muted-foreground">
+                    Selected: {selectedService.name} (
+                    {selectedService.duration
+                      ? `${selectedService.duration} mins`
+                      : "Duration varies"}
+                    )
+                  </p>
+                ) : (
+                  <p className="text-xs text-muted-foreground">
+                    Final price may vary based on actual hours worked and
+                    materials used.
+                  </p>
+                )}
               </div>
             </div>
           </div>

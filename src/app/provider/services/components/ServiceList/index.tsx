@@ -15,9 +15,15 @@ interface ServiceListProps {
   services: Service[];
   onEdit: (service: Service) => void;
   onDelete: (_id: string) => void;
+  onSetPrimary: (service: Service) => void;
 }
 
-export function ServiceList({ services, onEdit, onDelete }: ServiceListProps) {
+export function ServiceList({
+  services,
+  onEdit,
+  onDelete,
+  onSetPrimary,
+}: ServiceListProps) {
   if (services.length === 0) {
     return (
       <EmptyState
@@ -33,6 +39,7 @@ export function ServiceList({ services, onEdit, onDelete }: ServiceListProps) {
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead className="w-[50px]">Primary</TableHead>
             <TableHead>Service Name</TableHead>
             <TableHead>Category</TableHead>
             <TableHead>Price</TableHead>
@@ -43,6 +50,23 @@ export function ServiceList({ services, onEdit, onDelete }: ServiceListProps) {
         <TableBody>
           {services.map((service) => (
             <TableRow key={service?._id}>
+              <TableCell>
+                <div
+                  className="flex items-center justify-center cursor-pointer"
+                  onClick={() => onSetPrimary(service)}
+                  title={
+                    service.isPrimary ? "Primary Service" : "Set as Primary"
+                  }
+                >
+                  <div
+                    className={`h-4 w-4 rounded-full border border-primary flex items-center justify-center ${service.isPrimary ? "bg-primary" : "bg-transparent"}`}
+                  >
+                    {service.isPrimary && (
+                      <div className="h-2 w-2 rounded-full bg-white" />
+                    )}
+                  </div>
+                </div>
+              </TableCell>
               <TableCell className="font-medium">{service.name}</TableCell>
               <TableCell>{service.category}</TableCell>
               <TableCell>${service.price}</TableCell>

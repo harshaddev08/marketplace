@@ -21,6 +21,7 @@ export interface BackendProvider {
   location: string;
   isVerified: boolean;
   avatar?: string;
+  services?: Service[];
 }
 
 export interface Service {
@@ -30,6 +31,7 @@ export interface Service {
   price: number;
   duration: number;
   category: string;
+  isPrimary?: boolean;
 }
 
 export const ProviderService = {

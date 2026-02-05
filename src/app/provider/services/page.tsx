@@ -13,6 +13,7 @@ import {
   useDeleteService,
 } from "@/hooks/useServices";
 import { DeleteConfirmationDialog } from "@/components/DeleteConfirmationDialog";
+import { PrimaryConfirmationDialog } from "@/components/PrimaryConfirmationDialog";
 
 export default function ServicesPage() {
   const { data: services = [], isLoading } = useServices();
@@ -23,6 +24,8 @@ export default function ServicesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [primaryServiceToConfirm, setPrimaryServiceToConfirm] =
+    useState<Service | null>(null);
 
   const handleAddService = () => {
     setEditingService(null);
@@ -42,6 +45,27 @@ export default function ServicesPage() {
     if (deleteId) {
       deleteService.mutate(deleteId);
       setDeleteId(null);
+    }
+  };
+
+  const handleSetPrimary = (service: Service) => {
+    if (service.isPrimary) return; // Already primary
+    setPrimaryServiceToConfirm(service);
+  };
+
+  const handleConfirmSetPrimary = () => {
+    if (primaryServiceToConfirm) {
+      updateService.mutate(
+        {
+          id: primaryServiceToConfirm._id,
+          updates: { isPrimary: true },
+        },
+        {
+          onSuccess: () => {
+            setPrimaryServiceToConfirm(null);
+          },
+        },
+      );
     }
   };
 
@@ -74,6 +98,7 @@ export default function ServicesPage() {
           services={services}
           onEdit={handleEditService}
           onDelete={handleDeleteClick}
+          onSetPrimary={handleSetPrimary}
         />
       )}
 
@@ -90,6 +115,13 @@ export default function ServicesPage() {
         onConfirm={handleConfirmDelete}
         title="Delete Service"
         description="Are you sure you want to delete this service? This action cannot be undone."
+      />
+
+      <PrimaryConfirmationDialog
+        isOpen={!!primaryServiceToConfirm}
+        onClose={() => setPrimaryServiceToConfirm(null)}
+        onConfirm={handleConfirmSetPrimary}
+        serviceName={primaryServiceToConfirm?.name || ""}
       />
     </div>
   );

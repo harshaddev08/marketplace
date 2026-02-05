@@ -18,6 +18,8 @@ interface BookingDetails {
   date: Date | undefined;
   time: string;
   notes: string;
+  serviceId?: string;
+  price: number;
 }
 
 export const BookingModal = ({
@@ -32,14 +34,19 @@ export const BookingModal = ({
     mutationFn: (values: BookingDetails) => {
       if (!values.date) throw new Error("Date is required");
 
+      const selectedService = provider.services?.find(
+        (s) => s._id === values.serviceId,
+      );
+
       return BookingService.createBooking({
         providerId: provider.id,
-        service: provider.category,
+        serviceId: values.serviceId,
+        service: selectedService ? selectedService.name : provider.category,
         date: values.date.toISOString(),
         time: values.time,
         location: provider.location,
         notes: values.notes,
-        price: provider.hourlyRate,
+        price: values.price,
       });
     },
     onSuccess: (_, values) => {
