@@ -3,8 +3,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
-  Header,
-  Footer,
   ProviderCard,
   ProviderSearch,
   ProviderFilters,
@@ -37,7 +35,6 @@ export default function ProvidersPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
       <main className="grow pt-24 pb-20">
         <div className="container mx-auto px-4">
           <div className="mb-12">
@@ -86,7 +83,6 @@ export default function ProvidersPage() {
           )}
         </div>
       </main>
-      <Footer />
     </div>
   );
 }
