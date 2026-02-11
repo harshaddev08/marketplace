@@ -20,8 +20,16 @@ export interface BackendProvider {
   experience: number;
   location: string;
   isVerified: boolean;
+  status: string;
   avatar?: string;
   services?: Service[];
+}
+
+export interface PaginatedProvidersResponse {
+  providers: BackendProvider[];
+  total: number;
+  page: number;
+  totalPages: number;
 }
 
 export interface Service {
@@ -188,8 +196,8 @@ export const ProviderService = {
   },
 
   async getProviders(
-    filters: Record<string, string> = {},
-  ): Promise<BackendProvider[]> {
+    filters: Record<string, string | number> = {},
+  ): Promise<PaginatedProvidersResponse> {
     const response = await apiService.get("/providers", { params: filters });
     return response.data.data;
   },

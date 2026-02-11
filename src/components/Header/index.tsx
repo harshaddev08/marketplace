@@ -23,12 +23,15 @@ export const Header = () => {
 
         {/* Navigation */}
         <nav className="hidden md:flex items-center gap-8">
-          <Link
-            href="/providers"
-            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Find Providers
-          </Link>
+          {user && (
+            <Link
+              href="/providers"
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Find Providers
+            </Link>
+          )}
+
           <Link
             href="/#services"
             className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"

@@ -32,6 +32,7 @@ export interface Provider {
   experience: number;
   location: string;
   isVerified: boolean;
+  status: string;
   avatar?: string;
   services?: ServiceItem[];
 }

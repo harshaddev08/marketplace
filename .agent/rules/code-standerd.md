@@ -87,7 +87,14 @@ import { Button, Card, Input } from "@/components";
 
 - Component names must be in PascalCase.
 - Folder names must exactly match the component name.
+- Component names must be in PascalCase.
+- Folder names must exactly match the component name.
 - File name inside component folders must always be `index.tsx`.
+
+### Grouping Folders Exception
+
+- Logical grouping folders (e.g., `ui`, `provider`, `customer`) may be lowercase/kebab-case.
+- These folders are for organization only and should contain component folders inside them.
 
 ## 7. When Creating a New Component
 
@@ -134,6 +141,7 @@ The project uses the following barrel export files:
 - `src/components/index.ts` - Exports all main components
 - `src/components/provider/index.ts` - Exports provider-specific components
 - `src/components/ui/index.ts` - Exports all UI library components
+- `src/components/customer/index.ts` - Exports customer-specific components
 
 Always prioritize consistency, scalability, and clean architecture.
 Do not break these rules unless the user explicitly asks to override them.
